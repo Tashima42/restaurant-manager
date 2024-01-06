@@ -30,3 +30,5 @@ tmp/
 generator/tmp/
 
 dist/
+
+*.db
