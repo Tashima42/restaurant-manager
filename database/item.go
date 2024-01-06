@@ -34,3 +34,35 @@ func CreateItemTxx(tx *sqlx.Tx, i *Item) error {
 	_, err := tx.Exec(query, i.Name, i.Description, i.Picture, i.Price, time.Now(), time.Now())
 	return err
 }
+
+func GetItems(ctx context.Context, db *sqlx.DB) ([]Item, error) {
+	tx, err := db.BeginTxx(ctx, &sql.TxOptions{})
+	if err != nil {
+		return nil, err
+	}
+	items, err := GetItemsTxx(tx)
+	if err != nil {
+		return nil, err
+	}
+	return items, tx.Commit()
+}
+
+func GetItemsTxx(tx *sqlx.Tx) ([]Item, error) {
+	items := []Item{}
+	query := "SELECT name, description, picture, price, created_at, updated_at FROM items;"
+	rows, err := tx.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		item := new(Item)
+		if err := rows.Scan(&item.Name, &item.Description, &item.Picture, &item.Price, &item.CreatedAt, &item.UpdatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, *item)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
