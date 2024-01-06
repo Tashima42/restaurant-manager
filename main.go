@@ -141,6 +141,7 @@ func runServer(ec *Context) error {
 		return c.SendString("Hello, " + user.Name)
 	})
 	app.Post("/table", cr.CreateTable)
+	app.Post("/item", cr.CreateItem)
 
 	return app.Listen(":" + strconv.Itoa(ec.Port))
 }
