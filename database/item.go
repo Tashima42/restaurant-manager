@@ -7,16 +7,17 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type Item struct {
-	ID          string    `db:"id" json:"id"`
-	Name        string    `db:"name" json:"name" validate:"required"`
-	Description string    `db:"description" json:"description" validate:"required"`
-	Picture     string    `db:"picture" json:"picture" validate:"required"`
-	Price       int       `db:"price" json:"price" validate:"required"`
-	CreatedAt   time.Time `db:"created_at" json:"createdAt"`
-	UpdatedAt   time.Time `db:"updated_at" json:"updatedAt"`
+	ID          string     `db:"id" json:"id"`
+	Name        string     `db:"name" json:"name" validate:"required_if=ID ''"`
+	Description string     `db:"description" json:"description" validate:"required_if=ID ''"`
+	Picture     string     `db:"picture" json:"picture" validate:"required_if=ID ''"`
+	Price       int        `db:"price" json:"price" validate:"required_if=ID ''"`
+	CreatedAt   *time.Time `db:"created_at" json:"createdAt,omitempty"`
+	UpdatedAt   *time.Time `db:"updated_at" json:"updatedAt,omitempty"`
 }
 
 func CreateItem(ctx context.Context, db *sqlx.DB, i *Item) error {
@@ -25,7 +26,7 @@ func CreateItem(ctx context.Context, db *sqlx.DB, i *Item) error {
 		return err
 	}
 	if err := CreateItemTxx(tx, i); err != nil {
-		return err
+		return errors.Wrap(err, tx.Rollback().Error())
 	}
 	return tx.Commit()
 }
@@ -44,7 +45,7 @@ func GetItems(ctx context.Context, db *sqlx.DB) ([]Item, error) {
 	}
 	items, err := GetItemsTxx(tx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, tx.Rollback().Error())
 	}
 	return items, tx.Commit()
 }
@@ -67,4 +68,23 @@ func GetItemsTxx(tx *sqlx.Tx) ([]Item, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+func GetItemByIDTxx(tx *sqlx.Tx, id string) (*Item, error) {
+	var item Item
+	query := "SELECT id, name, description, picture, price, created_at, updated_at FROM items WHERE id=$1 LIMIT 1;"
+	err := tx.Get(&item, query, id)
+	if err != nil {
+		return nil, err
+	}
+	return &item, nil
+}
+
+func VerifyItemExistsTxx(tx *sqlx.Tx, id string) (bool, error) {
+	var exists bool
+	query := "SELECT EXISTS(SELECT 1 FROM items WHERE id = $1);"
+	if err := tx.Get(&exists, query, id); err != nil {
+		return false, err
+	}
+	return exists, nil
 }

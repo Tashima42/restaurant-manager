@@ -7,6 +7,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/pkg/errors"
 )
 
 type Table struct {
@@ -23,7 +24,7 @@ func CreateTable(ctx context.Context, db *sqlx.DB, t *Table) error {
 		return err
 	}
 	if err := CreateTableTxx(tx, t); err != nil {
-		return err
+		return errors.Wrap(err, tx.Rollback().Error())
 	}
 	return tx.Commit()
 }
@@ -42,7 +43,7 @@ func GetTables(ctx context.Context, db *sqlx.DB) ([]Table, error) {
 	}
 	tables, err := GetTablesTxx(tx)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, tx.Rollback().Error())
 	}
 	return tables, tx.Commit()
 }

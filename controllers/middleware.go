@@ -3,13 +3,13 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pkg/errors"
 	"github.com/tashima42/restaurant-manager/database"
 	"github.com/tashima42/restaurant-manager/hash"
 )
@@ -48,7 +48,7 @@ func (cr *Controller) SignIn(c *fiber.Ctx) error {
 	if err != nil {
 		cr.Logger.Info(requestID, " error: "+err.Error())
 		if !strings.Contains(err.Error(), "no rows in result set") {
-			return err
+			return errors.Wrap(err, tx.Rollback().Error())
 		}
 		return fiber.NewError(http.StatusNotFound, "email "+s.Email+" not found")
 	}
@@ -108,7 +108,7 @@ func (cr *Controller) ValidateToken(c *fiber.Ctx) error {
 	cr.Logger.Info(requestID, ": getting user")
 	user, err := database.GetUserByIDTxx(tx, ac.User.ID)
 	if err != nil {
-		return err
+		return errors.Wrap(err, tx.Rollback().Error())
 	}
 	if err := tx.Commit(); err != nil {
 		return err

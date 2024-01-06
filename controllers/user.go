@@ -3,12 +3,12 @@ package controllers
 import (
 	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pkg/errors"
 	"github.com/tashima42/restaurant-manager/database"
 	"github.com/tashima42/restaurant-manager/hash"
 	"go.uber.org/zap"
@@ -36,7 +36,7 @@ func (cr *Controller) CreateUser(c *fiber.Ctx) error {
 	if _, err := database.GetUserByEmailTxx(tx, user.Email); err != nil {
 		cr.Logger.Info(requestID, " error: "+err.Error())
 		if !strings.Contains(err.Error(), "no rows in result set") {
-			return err
+			return errors.Wrap(err, tx.Rollback().Error())
 		}
 		cr.Logger.Info(requestID, " user doesn't exists, continue")
 	} else {

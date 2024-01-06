@@ -150,6 +150,10 @@ func runServer(ec *Context) error {
 
 	app.Post("/menu", cr.CreateMenu)
 	app.Get("/menus", cr.GetMenus)
+	app.Post("/menu/:menu_id/item/:item_id", cr.AddItemToMenu)
+	app.Get("/menu/:menu_id", cr.GetMenu)
+
+	app.Post("/order", cr.CreateOrder)
 
 	return app.Listen(":" + strconv.Itoa(ec.Port))
 }

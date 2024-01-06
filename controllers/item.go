@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/pkg/errors"
 	"github.com/tashima42/restaurant-manager/database"
 )
 
@@ -52,7 +53,7 @@ func (cr *Controller) CreateItems(c *fiber.Ctx) error {
 	for _, item := range *items {
 		cr.Logger.Info(requestID, ": creating item "+item.Name)
 		if err := database.CreateItemTxx(tx, &item); err != nil {
-			return err
+			return errors.Wrap(err, tx.Rollback().Error())
 		}
 		cr.Logger.Info(requestID, ": created item "+item.Name)
 	}
