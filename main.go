@@ -148,5 +148,8 @@ func runServer(ec *Context) error {
 	app.Post("/items", cr.CreateItems)
 	app.Get("/items", cr.GetItems)
 
+	app.Post("/menu", cr.CreateMenu)
+	app.Get("/menus", cr.GetMenus)
+
 	return app.Listen(":" + strconv.Itoa(ec.Port))
 }
