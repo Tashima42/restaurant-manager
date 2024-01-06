@@ -140,6 +140,7 @@ func runServer(ec *Context) error {
 		user := c.Locals("user").(*database.User)
 		return c.SendString("Hello, " + user.Name)
 	})
+	app.Post("/table", cr.CreateTable)
 
 	return app.Listen(":" + strconv.Itoa(ec.Port))
 }
