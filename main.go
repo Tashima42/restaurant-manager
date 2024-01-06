@@ -140,7 +140,10 @@ func runServer(ec *Context) error {
 		user := c.Locals("user").(*database.User)
 		return c.SendString("Hello, " + user.Name)
 	})
+
 	app.Post("/table", cr.CreateTable)
+	app.Get("/tables", cr.GetTables)
+
 	app.Post("/item", cr.CreateItem)
 	app.Post("/items", cr.CreateItems)
 	app.Get("/items", cr.GetItems)

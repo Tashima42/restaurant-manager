@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS carts (
-  id INTEGER PRIMARY KEY,
-  'table_id' INTEGER NOT NULL,
+  id TEXT PRIMARY KEY,
+  'table_id' TEXT NOT NULL,
   'created_at' DATE NOT NULL,
   'updated_at' DATE NOT NULL,
 

@@ -28,3 +28,13 @@ func (cr *Controller) CreateTable(c *fiber.Ctx) error {
 	cr.Logger.Info(requestID, ": table created")
 	return c.JSON(map[string]interface{}{"success": true})
 }
+
+func (cr *Controller) GetTables(c *fiber.Ctx) error {
+	requestID := fmt.Sprintf("%+v", c.Locals("requestid"))
+	cr.Logger.Info(requestID, ": getting tables")
+	tables, err := database.GetTables(c.Context(), cr.DB)
+	if err != nil {
+		return err
+	}
+	return c.JSON(tables)
+}

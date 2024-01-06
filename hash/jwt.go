@@ -10,7 +10,7 @@ import (
 
 type AuthClaims struct {
 	User struct {
-		ID    int64             `json:"id"`
+		ID    string            `json:"id"`
 		Email string            `json:"email"`
 		Role  database.UserRole `json:"role"`
 	} `json:"user"`

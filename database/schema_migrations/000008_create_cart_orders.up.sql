@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS cart_orders (
-  id INTEGER PRIMARY KEY,
-  'cart_id' INTEGER NOT NULL,
-  'order_id' INTEGER NOT NULL,
+  id TEXT PRIMARY KEY,
+  'cart_id' TEXT NOT NULL,
+  'order_id' TEXT NOT NULL,
   'created_at' DATE NOT NULL,
   'updated_at' DATE NOT NULL,
 

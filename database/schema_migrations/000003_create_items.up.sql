@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS items (
-  id INTEGER PRIMARY KEY,
+  id TEXT PRIMARY KEY,
   'name' TEXT NOT NULL,
   'description' TEXT NOT NULL,
   'picture' TEXT NOT NULL,

@@ -3,6 +3,7 @@ package database
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -14,7 +15,7 @@ const (
 )
 
 type User struct {
-	ID        int64     `db:"id" json:"id"`
+	ID        string    `db:"id" json:"id"`
 	Name      string    `db:"name" json:"name" validate:"required"`
 	Email     string    `db:"email" json:"email" validate:"required"`
 	Password  string    `db:"password" json:"password" validate:"required"`
@@ -33,7 +34,7 @@ func GetUserByEmailTxx(tx *sqlx.Tx, email string) (*User, error) {
 	return &u, nil
 }
 
-func GetUserByIDTxx(tx *sqlx.Tx, id int64) (*User, error) {
+func GetUserByIDTxx(tx *sqlx.Tx, id string) (*User, error) {
 	var u User
 	query := "SELECT id, name, email, password, role, created_at, updated_at FROM users WHERE id=$1 LIMIT 1;"
 	err := tx.Get(&u, query, id)
@@ -44,7 +45,8 @@ func GetUserByIDTxx(tx *sqlx.Tx, id int64) (*User, error) {
 }
 
 func CreateUserTxx(tx *sqlx.Tx, u *User) error {
-	query := "INSERT INTO users(role, name, email, password, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6);"
-	_, err := tx.Exec(query, u.Role, u.Name, u.Email, u.Password, time.Now(), time.Now())
+	id := uuid.New().String()
+	query := "INSERT INTO users(id, role, name, email, password, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6, $7);"
+	_, err := tx.Exec(query, id, u.Role, u.Name, u.Email, u.Password, time.Now(), time.Now())
 	return err
 }

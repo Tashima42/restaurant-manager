@@ -5,7 +5,7 @@ import (
 )
 
 type Menu struct {
-	ID        int64     `db:"id" json:"id"`
+	ID        string    `db:"id" json:"id"`
 	Name      string    `db:"name" json:"name" validate:"required"`
 	Items     []Item    `db:"items" json:"items"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
