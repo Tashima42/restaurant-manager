@@ -9,10 +9,8 @@ import (
 type UserRole int
 
 const (
-	UserRoleStudent     UserRole = 1
-	UserRoleCoordinator UserRole = 2
-	UserRoleSecretary   UserRole = 3
-	UserRoleInstructor  UserRole = 4
+	UserRoleManager UserRole = 1
+	UserRoleWaiter  UserRole = 2
 )
 
 type User struct {
@@ -43,4 +41,10 @@ func GetUserByIDTxx(tx *sqlx.Tx, id int64) (*User, error) {
 		return nil, err
 	}
 	return &u, nil
+}
+
+func CreateUserTxx(tx *sqlx.Tx, u *User) error {
+	query := "INSERT INTO users(role, name, email, password, created_at, updated_at) VALUES($1, $2, $3, $4, $5, $6);"
+	_, err := tx.Exec(query, u.Role, u.Name, u.Email, u.Password, time.Now(), time.Now())
+	return err
 }

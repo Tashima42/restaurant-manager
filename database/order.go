@@ -4,10 +4,10 @@ import (
 	"time"
 )
 
-type Menu struct {
+type Order struct {
 	ID        int64     `db:"id" json:"id"`
-	Name      string    `db:"name" json:"name" validate:"required"`
-	Items     []Item    `db:"items" json:"items"`
+	Item      Item      `db:"item" json:"item" validate:"required"`
+	Quantity  int       `db:"quantity" json:"quantity" validate:"required"`
 	CreatedAt time.Time `db:"created_at" json:"createdAt"`
 	UpdatedAt time.Time `db:"updated_at" json:"updatedAt"`
 }

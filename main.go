@@ -40,15 +40,24 @@ func main() {
 				Name:  "serve",
 				Usage: "Serve the api",
 				Flags: []cli.Flag{
-					&cli.UintFlag{
+					&cli.IntFlag{
 						Name:     "port",
 						Usage:    "port to run the service",
 						Aliases:  []string{"p"},
 						EnvVars:  []string{"PORT"},
 						Value:    8080,
-						Required: true,
+						Required: false,
+					},
+					&cli.StringFlag{
+						Name:     "path",
+						Aliases:  []string{"d"},
+						EnvVars:  []string{"DB_PATH"},
+						Value:    "restaurant.db",
+						Usage:    "database path",
+						Required: false,
 					},
 				},
+				Action: run,
 			},
 			{
 				Name:  "database",
@@ -64,7 +73,7 @@ func main() {
 								Flags: []cli.Flag{
 									&cli.StringFlag{
 										Name:     "path",
-										Aliases:  []string{"p"},
+										Aliases:  []string{"d"},
 										EnvVars:  []string{"DB_PATH"},
 										Value:    "restaurant.db",
 										Usage:    "database path",
@@ -92,7 +101,7 @@ func main() {
 }
 
 func run(c *cli.Context) error {
-	db, err := database.Open(c.String("db-path"), c.Bool("migrate-down"))
+	db, err := database.Open(c.String("path"), c.Bool("migrate-down"))
 	if err != nil {
 		return err
 	}
@@ -124,10 +133,11 @@ func runServer(ec *Context) error {
 	app.Get("/healthcheck", func(c *fiber.Ctx) error {
 		return c.SendString("success")
 	})
+	app.Post("/user", cr.CreateUser)
 	app.Post("/signin", cr.SignIn)
 	app.Use(cr.ValidateToken)
 	app.Get("/hello", func(c *fiber.Ctx) error {
-		user := c.Locals("table").(*database.User)
+		user := c.Locals("user").(*database.User)
 		return c.SendString("Hello, " + user.Name)
 	})
 

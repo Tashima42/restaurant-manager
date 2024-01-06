@@ -79,51 +79,51 @@ func (cr *Controller) SignIn(c *fiber.Ctx) error {
 
 func (cr *Controller) ValidateToken(c *fiber.Ctx) error {
 	requestID := fmt.Sprintf("%+v", c.Locals("requestid"))
-	cr.Logger.Info(requestID, " getting auth token cookie")
+	cr.Logger.Info(requestID, ": getting auth token cookie")
 	token := c.Cookies("auth-token")
 	if token == "" {
-		token = c.GetReqHeaders()["authorization"][0]
+		authorizationHeader := c.GetReqHeaders()["authorization"]
+		if len(authorizationHeader) <= 0 {
+			return errors.New("missing authorization header value")
+		}
+		token = authorizationHeader[0]
 	}
 	if token == "" {
-		cr.Logger.Info(requestID, " missing auth token cookie")
+		cr.Logger.Info(requestID, ": missing auth token cookie")
 		return fiber.NewError(http.StatusUnauthorized, "missing auth token")
 	}
-	cr.Logger.Info(requestID, " parsing auth token")
+	cr.Logger.Info(requestID, ": parsing auth token")
 	ac, err := hash.ParseJWT(cr.JWTSecret, token)
 	if err != nil {
 		cr.Logger.Error(requestID, err)
 		return err
 	}
 
-	cr.Logger.Info(requestID, " starting transaction")
+	cr.Logger.Info(requestID, ": starting transaction")
 	tx, err := cr.DB.BeginTxx(c.Context(), &sql.TxOptions{})
 	if err != nil {
 		return err
 	}
 
-	cr.Logger.Info("getting user")
+	cr.Logger.Info(requestID, ": getting user")
 	user, err := database.GetUserByIDTxx(tx, ac.User.ID)
 	if err != nil {
 		return err
 	}
-
-	c.Locals("user", user)
-
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+
+	cr.Logger.Info(requestID, ": seting user on local variable")
+	c.Locals("user", user)
 
 	return c.Next()
 }
 func (cr *Controller) ErrorHandler(ctx *fiber.Ctx, err error) error {
 	requestID := ctx.Locals("requestid")
-	cr.Logger.Error(requestID, err)
+	cr.Logger.Errorf("%s: %s", requestID, err.Error())
 	code := fiber.StatusInternalServerError
-	var e *fiber.Error
-	if errors.As(err, &e) {
-		code = e.Code
-	}
-	err = ctx.Status(code).JSON(GlobalError{Success: false, Message: e.Error()})
+	err = ctx.Status(code).JSON(GlobalError{Success: false, Message: err.Error()})
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString("Internal Server Error")
 	}

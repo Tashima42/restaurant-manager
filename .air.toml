@@ -5,8 +5,8 @@ tmp_dir = "tmp"
 [build]
 args_bin = []
 bin = "dist/restaurant-manager_darwin_arm64/restaurant-manager"
-cmd = "goreleaser build --snapshot --single-tar"
-delay = 0
+cmd = "goreleaser build --snapshot --single-target --clean"
+delay = 2
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
 exclude_file = []
 exclude_regex = ["_test.go"]
